@@ -1,0 +1,7 @@
+src/.vs/
+src/packages/
+src/TestEase.Tests/bin/
+src/TestEase.Tests/obj/
+src/TestEase.Tests/_TestDataLibrary/Test/
+src/TestEase/bin/
+src/TestEase/obj/
