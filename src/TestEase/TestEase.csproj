@@ -42,7 +42,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\FileHelper.cs" />
+    <Compile Include="Helpers\ItemParser.cs" />
+    <Compile Include="LibrarItemDictionaries\BaseItemDictionary.cs" />
     <Compile Include="LibrarItemDictionaries\SqlItemDictionary.cs" />
+    <Compile Include="LibrarItemDictionaries\JsonItemDictionary.cs" />
+    <Compile Include="LibrarItemDictionaries\XmlItemDictionary.cs" />
     <Compile Include="LibraryItems\ItemFileType.cs" />
     <Compile Include="LibrarItemDictionaries\IItemDictionary.cs" />
     <Compile Include="LibraryItems\LibraryItem.cs" />

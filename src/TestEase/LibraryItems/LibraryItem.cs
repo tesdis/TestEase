@@ -5,7 +5,7 @@ namespace TestEase.LibraryItems
 {
     public class LibraryItem
     {
-        private string libraryItemText = null;
+        private string _libraryItemText;
 
         public LibraryItem(FileSystemInfo fi)
         {
@@ -14,6 +14,6 @@ namespace TestEase.LibraryItems
 
         public string ItemFilePath { get; set; }
 
-        public string LibraryItemText => libraryItemText ?? (libraryItemText = FileHelper.GetFileContents(ItemFilePath));
+        public string LibraryItemText => _libraryItemText ?? (_libraryItemText = FileHelper.GetFileContents(ItemFilePath));
     }
 }

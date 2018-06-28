@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -15,6 +16,7 @@ namespace TestEase
         private readonly string _libraryFolderKey;
         private readonly IList<string> _libraryPaths = new List<string>();
         private IDictionary<string, IItemDictionary> _dictionaries = new Dictionary<string, IItemDictionary>();
+        private readonly IDictionary<ItemFileType,string> _extensionMappings = new Dictionary<ItemFileType, string>();
 
         public TestDataManager(IList<string> pathsToSearch = null)
         {
@@ -52,7 +54,7 @@ namespace TestEase
                 if (!_libraryPaths.Contains(s)) _libraryPaths.Add(s);
             }
 
-            var validExtensions = _dictionaries.Values.Select(itemDic => itemDic.GetFileExtension).ToList();
+            var validExtensions = _dictionaries.Values.Select(itemDic => itemDic.FileExtension).ToList();
             var files = new List<FileInfo>();
 
             foreach (var path in _libraryPaths)
@@ -108,10 +110,22 @@ namespace TestEase
             _dictionaries = new Dictionary<string, IItemDictionary>();
 
             var sqlDic = new SqlItemDictionary();
+            var xmlDic = new XmlItemDictionary();
+            var jsonDic = new JsonItemDictionary();
 
-            _dictionaries.Add(sqlDic.GetFileExtension, sqlDic);
+            _dictionaries.Add(sqlDic.FileExtension, sqlDic);
+            _dictionaries.Add(xmlDic.FileExtension, xmlDic);
+            _dictionaries.Add(jsonDic.FileExtension, jsonDic);
+            _extensionMappings.Add(sqlDic.FileType,sqlDic.FileExtension);
+            _extensionMappings.Add(xmlDic.FileType, xmlDic.FileExtension);
+            _extensionMappings.Add(jsonDic.FileType, jsonDic.FileExtension);
         }
 
-        public SqlItemDictionary Sql { get; }
+        public SqlItemDictionary Sql => (SqlItemDictionary) _dictionaries[_extensionMappings[ItemFileType.Sql]];
+        public XmlItemDictionary Xml => (XmlItemDictionary)_dictionaries[_extensionMappings[ItemFileType.Xml]];
+        public JsonItemDictionary Json => (JsonItemDictionary)_dictionaries[_extensionMappings[ItemFileType.Json]];
     }
 }
+
+
+

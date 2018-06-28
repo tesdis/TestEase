@@ -1,12 +1,13 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using TestEase.LibraryItems;
 
 namespace TestEase.LibrarItemDictionaries
 {
     public interface IItemDictionary
     {
-        ItemFileType GetFileType();
-        string GetFileExtension { get; }
+        ItemFileType FileType { get; }
+        string FileExtension { get; }
         void AddFileInfo(FileInfo file);
     }
 }

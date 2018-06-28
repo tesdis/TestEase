@@ -64,6 +64,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="_TestDataLibrary\Test\TestJson.json" />
+    <Content Include="_TestDataLibrary\Test\TestXml.xml" />
     <Content Include="_TestDataLibrary\Test\Create_CT_Rule.sql" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
