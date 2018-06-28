@@ -9,7 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestEase", "TestEase\TestEa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FD7F6E1F-AD50-409B-9BF7-DC016E1D5F11}"
 	ProjectSection(SolutionItems) = preProject
+		projectsettings.DotSettings = projectsettings.DotSettings
 		..\README.md = ..\README.md
+		TestEase.sln.DotSettings = TestEase.sln.DotSettings
 	EndProjectSection
 EndProject
 Global
