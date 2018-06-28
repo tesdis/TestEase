@@ -1,15 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Dynamic;
-using System.Text;
-using System.Text.RegularExpressions;
-using TestEase.LibrarItemDictionaries;
-
-namespace TestEase.Helpers
+﻿namespace TestEase.Helpers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Dynamic;
+    using System.Text;
+    using System.Text.RegularExpressions;
+
+    using TestEase.LibraryItemDictionaries;
+
+    /// <summary>
+    /// Responsible for parsing and replacing macro values in library items
+    /// </summary>
     public static class ItemParser
     {
+        /// <summary>
+        /// Regex pattern for file replacements
+        /// </summary>
         private const string JsonStylePropertyPattern = @"                
                 \s*
                 ([A-Za-z0-9_]+)\s*                                      (?# The property name)
@@ -18,73 +25,43 @@ namespace TestEase.Helpers
                 ,?\s*                                                   (?# Multiple property name/value pairs can be separated by commas)                
             ";
 
-        public static string Parse(string sqlCode, IDictionary<string, object> replacementValues,
+        /// <summary>
+        /// The parse.
+        /// </summary>
+        /// <param name="itemText">
+        /// The text to parse and replace any replacement values in
+        /// </param>
+        /// <param name="replacementValues">
+        /// The replacement values.
+        /// </param>
+        /// <param name="itemDictionary">
+        /// The parent item dictionary that will be used for include statements
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        public static string Parse(
+            string itemText,
+            IDictionary<string, object> replacementValues,
             BaseItemDictionary itemDictionary)
         {
-            return
-                ProcessReplacementValues(
-                    ProcessIncludeStatements(ProcessReplacementValues(sqlCode, replacementValues), itemDictionary), replacementValues);
+            return ProcessReplacementValues(
+                ProcessIncludeStatements(ProcessReplacementValues(itemText, replacementValues), itemDictionary),
+                replacementValues);
         }
 
-        private static string ProcessReplacementValues(string libraryItemText, IDictionary<string, object> replacements)
-        {
-            //Get the defaults if there are any
-            var defaults = GetDefaultsReplacementValues(libraryItemText);
-            var finalReplacementValues = defaults.Item1;
-            libraryItemText = defaults.Item2;
-
-            //Override the defaults with any that were actually passed in
-            var overrideReplacementValues = replacements ?? new ExpandoObject();
-
-            foreach (var key in overrideReplacementValues.Keys)
-            {
-                finalReplacementValues[key] = overrideReplacementValues[key];
-            }
-
-            var replacementRegex = new Regex(@"\{(\w+)\}");
-            var replacementValuesInItemText = new HashSet<string>();
-
-            var text = libraryItemText;
-            libraryItemText = replacementRegex.Replace(libraryItemText, match =>
-            {
-                var key = "";
-                var replacementValueName = match.Groups[1].Value;
-
-                replacementValuesInItemText.Add(key);
-
-                foreach (var replacementKvp in finalReplacementValues)
-                {
-                    if (replacementKvp.Key.ToLower() == replacementValueName.ToLower())
-                    {
-                        key = replacementKvp.Key;
-                    }
-                }
-
-                if (key == "")
-                {
-                    throw new InvalidOperationException(
-                        string.Format("A replacement value was not specified for {0}. \n\n {1}", replacementValueName,
-                            text));
-                }
-
-                string newValue;
-
-                try
-                {
-                    newValue = finalReplacementValues[key].ToString();
-                }
-                catch (Exception)
-                {
-                    throw new InvalidOperationException(
-                        string.Format(@"Replacement value ""{0}"" could not be converted into a string. \n\n {1}",
-                            replacementValueName, text));
-                }
-
-                return newValue;
-            });
-
-            return libraryItemText;
-        }
+        /// <summary>
+        /// The process include statements.
+        /// </summary>
+        /// <param name="libraryItemText">
+        /// The library item text.
+        /// </param>
+        /// <param name="itemDictionary">
+        /// The item dictionary.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
         private static string ProcessIncludeStatements(string libraryItemText, BaseItemDictionary itemDictionary)
         {
             var includeStatementPattern = @"
@@ -111,62 +88,149 @@ namespace TestEase.Helpers
 
                 ";
 
-            var includeStatementRegex = new Regex(includeStatementPattern,
+            var includeStatementRegex = new Regex(
+                includeStatementPattern,
                 RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
-            return includeStatementRegex.Replace(libraryItemText, includeStatementMatch =>
-            {
-                var includedLibraryItemName = includeStatementMatch.Groups[1].Value;
-                string includeLibraryItem;
-
-                try
-                {
-                    includeLibraryItem = itemDictionary[includedLibraryItemName].LibraryItemText;
-                }
-                catch (KeyNotFoundException)
-                {
-                    throw new InvalidOperationException(
-                        $"The library item \"{includedLibraryItemName}\" that is part of an include statement was not found.\n\n{libraryItemText}");
-                }
-
-                string newIncludeLibraryItem;
-
-                //Are there any JSON-style replacement values specified?
-                if (includeStatementMatch.Groups[3].Captures.Count > 0)
-                {
-                    //JSON-style replacement values were specified. If more than one was specified,
-                    //then each one is like a separate include statement.
-                    var allIncludes = new StringBuilder();
-
-                    foreach (Capture capture in includeStatementMatch.Groups[3].Captures)
+            return includeStatementRegex.Replace(
+                libraryItemText,
+                includeStatementMatch =>
                     {
-                        allIncludes.AppendLine(ProcessReplacementValues(includeLibraryItem,
-                            GetReplacementValuesFromJsonString(capture.Value)));
-                    }
+                        var includedLibraryItemName = includeStatementMatch.Groups[1].Value;
+                        string includeLibraryItem;
 
-                    newIncludeLibraryItem = allIncludes.ToString();
-                }
-                else
-                {
-                    //Just a plain INCLUDE statement with no JSON-style replacement values. E.g.: INCLUDE Some.Stuff
-                    newIncludeLibraryItem = ProcessReplacementValues(includeLibraryItem, null);
-                }
+                        try
+                        {
+                            includeLibraryItem = itemDictionary[includedLibraryItemName].LibraryItemText;
+                        }
+                        catch (KeyNotFoundException keyNotFoundEx)
+                        {
+                            throw new InvalidOperationException(
+                                $"The library item \"{includedLibraryItemName}\" that is part of an include statement was not found.\n\n{libraryItemText}", keyNotFoundEx);
+                        }
 
-                if (Debugger.IsAttached)
-                {
-                    newIncludeLibraryItem = "\r\n\r\n--INCLUDED from " + includedLibraryItemName + "\r\n\r\n" +
-                                            newIncludeLibraryItem + "\r\n\r\n--END INCLUDE\r\n\r\n";
-                }
+                        string newIncludeLibraryItem;
 
-                //Recursively process all include statements
-                return ProcessIncludeStatements(newIncludeLibraryItem, itemDictionary);
-            });
+                        // Are there any JSON-style replacement values specified?
+                        if (includeStatementMatch.Groups[3].Captures.Count > 0)
+                        {
+                            // JSON-style replacement values were specified. If more than one was specified,
+                            // then each one is like a separate include statement.
+                            var allIncludes = new StringBuilder();
+
+                            foreach (Capture capture in includeStatementMatch.Groups[3].Captures)
+                            {
+                                allIncludes.AppendLine(
+                                    ProcessReplacementValues(
+                                        includeLibraryItem,
+                                        GetReplacementValuesFromJsonString(capture.Value)));
+                            }
+
+                            newIncludeLibraryItem = allIncludes.ToString();
+                        }
+                        else
+                        {
+                            // Just a plain INCLUDE statement with no JSON-style replacement values. E.g.: INCLUDE Some.Stuff
+                            newIncludeLibraryItem = ProcessReplacementValues(includeLibraryItem, null);
+                        }
+
+                        if (Debugger.IsAttached)
+                        {
+                            newIncludeLibraryItem = "\r\n\r\n--INCLUDED from " + includedLibraryItemName + "\r\n\r\n"
+                                                    + newIncludeLibraryItem + "\r\n\r\n--END INCLUDE\r\n\r\n";
+                        }
+
+                        // Recursively process all include statements
+                        return ProcessIncludeStatements(newIncludeLibraryItem, itemDictionary);
+                    });
         }
+
+        /// <summary>
+        /// Processes replacement values into a library item
+        /// </summary>
+        /// <param name="libraryItemText">
+        /// The library item text.
+        /// </param>
+        /// <param name="replacements">
+        /// The replacements.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        private static string ProcessReplacementValues(string libraryItemText, IDictionary<string, object> replacements)
+        {
+            // Get the defaults if there are any
+            var defaults = GetDefaultsReplacementValues(libraryItemText);
+            var finalReplacementValues = defaults.Item1;
+            libraryItemText = defaults.Item2;
+
+            // Override the defaults with any that were actually passed in
+            var overrideReplacementValues = replacements ?? new ExpandoObject();
+
+            foreach (var key in overrideReplacementValues.Keys)
+            {
+                finalReplacementValues[key] = overrideReplacementValues[key];
+            }
+
+            var replacementRegex = new Regex(@"\{(\w+)\}");
+            var replacementValuesInItemText = new HashSet<string>();
+
+            var text = libraryItemText;
+            libraryItemText = replacementRegex.Replace(
+                libraryItemText,
+                match =>
+                    {
+                        var key = string.Empty;
+                        var replacementValueName = match.Groups[1].Value;
+
+                        replacementValuesInItemText.Add(key);
+
+                        foreach (var replacementKvp in finalReplacementValues)
+                        {
+                            if (replacementKvp.Key.ToLower() == replacementValueName.ToLower())
+                            {
+                                key = replacementKvp.Key;
+                            }
+                        }
+
+                        if (key == string.Empty)
+                        {
+                            throw new InvalidOperationException(
+                                $"A replacement value was not specified for {replacementValueName}. \n\n {text}");
+                        }
+
+                        string newValue;
+
+                        try
+                        {
+                            newValue = finalReplacementValues[key].ToString();
+                        }
+                        catch (Exception exception)
+                        {
+                            throw new InvalidOperationException(
+                                $@"Replacement value ""{replacementValueName}"" could not be converted into a string. \n\n {text}", exception);
+                        }
+
+                        return newValue;
+                    });
+
+            return libraryItemText;
+        }
+
+        /// <summary>
+        /// Gets the default values for replacement items
+        /// </summary>
+        /// <param name="libraryItemText">
+        /// The text to search for
+        /// </param>
+        /// <returns>
+        /// The <see cref="Tuple"/>.
+        /// </returns>
         private static Tuple<IDictionary<string, object>, string> GetDefaultsReplacementValues(string libraryItemText)
         {
             IDictionary<string, object> replacementValues = new ExpandoObject();
 
-            const string defaultsPattern = @"
+            const string DefaultsPattern = @"
                     DEFAULTS 
                     \s*:\s*
                     (
@@ -180,15 +244,29 @@ namespace TestEase.Helpers
 
             var newSqlScript = libraryItemText;
 
-            var defaultsRegex = new Regex(defaultsPattern, RegexOptions.IgnorePatternWhitespace);
+            var defaultsRegex = new Regex(DefaultsPattern, RegexOptions.IgnorePatternWhitespace);
 
-            if (!defaultsRegex.IsMatch(libraryItemText)) return Tuple.Create(replacementValues, newSqlScript);
+            if (!defaultsRegex.IsMatch(libraryItemText))
+            {
+                return Tuple.Create(replacementValues, newSqlScript);
+            }
 
-            newSqlScript = defaultsRegex.Replace(libraryItemText, "");
-            replacementValues = GetReplacementValuesFromJsonString(defaultsRegex.Match(libraryItemText).Groups[1].Value);
+            newSqlScript = defaultsRegex.Replace(libraryItemText, string.Empty);
+            replacementValues =
+                GetReplacementValuesFromJsonString(defaultsRegex.Match(libraryItemText).Groups[1].Value);
 
             return Tuple.Create(replacementValues, newSqlScript);
         }
+
+        /// <summary>
+        /// The get replacement values from json string.
+        /// </summary>
+        /// <param name="replacementObjectJson">
+        /// The replacement object json.
+        /// </param>
+        /// <returns>
+        /// Collection of replacement values
+        /// </returns>
         private static IDictionary<string, object> GetReplacementValuesFromJsonString(string replacementObjectJson)
         {
             var jsonObjectRegex = new Regex(JsonStylePropertyPattern, RegexOptions.IgnorePatternWhitespace);

@@ -43,12 +43,14 @@
   <ItemGroup>
     <Compile Include="Helpers\FileHelper.cs" />
     <Compile Include="Helpers\ItemParser.cs" />
-    <Compile Include="LibrarItemDictionaries\BaseItemDictionary.cs" />
-    <Compile Include="LibrarItemDictionaries\SqlItemDictionary.cs" />
-    <Compile Include="LibrarItemDictionaries\JsonItemDictionary.cs" />
-    <Compile Include="LibrarItemDictionaries\XmlItemDictionary.cs" />
+    <Compile Include="LibraryItemDictionaries\BaseItemDictionary.cs" />
+    <Compile Include="LibraryItemDictionaries\ItemDictionaryCollection.cs" />
+    <Compile Include="LibraryItemDictionaries\SqlItemDictionary.cs" />
+    <Compile Include="LibraryItemDictionaries\JsonItemDictionary.cs" />
+    <Compile Include="LibraryItemDictionaries\TextItemDictionary.cs" />
+    <Compile Include="LibraryItemDictionaries\XmlItemDictionary.cs" />
     <Compile Include="LibraryItems\ItemFileType.cs" />
-    <Compile Include="LibrarItemDictionaries\IItemDictionary.cs" />
+    <Compile Include="LibraryItemDictionaries\IItemDictionary.cs" />
     <Compile Include="LibraryItems\LibraryItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestDataManager.cs" />
