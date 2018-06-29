@@ -17,7 +17,7 @@
             var tm = new TestDataManager();
 
             tm.Sql.SetupConnections(new Dictionary<string, string> { { "WORKSPACE", "tester" } });
-            tm.Sql.QueueSql("Test.Create_CT_Rule");
+            tm.Sql.QueueLibraryItem("Test.Create_CT_Rule");
 
             Assert.IsTrue(tm.Sql.QueuedSql.Count == 1);
             Assert.IsTrue(tm.Sql.QueuedSql.First().Value.ToString() == "\r\n\r\nSelect 1,name,'Boom' from sys.databases\r\n");
@@ -29,7 +29,7 @@
             var tm = new TestDataManager();
 
             tm.Sql.SetupConnections(new Dictionary<string, string> { { "WORKSPACE", "tester" } });
-            tm.Sql.QueueSql("Test.Create_CT_Rule", new Dictionary<string, object> { { "Test_Replace", 2 } });
+            tm.Sql.QueueLibraryItem("Test.Create_CT_Rule", new Dictionary<string, object> { { "Test_Replace", 2 } });
 
             Assert.IsTrue(tm.Sql.QueuedSql.Count == 1);
             Assert.IsTrue(tm.Sql.QueuedSql.First().Value.ToString() == "\r\n\r\nSelect 2,name,'Boom' from sys.databases\r\n");
@@ -41,7 +41,7 @@
             var tm = new TestDataManager();
 
             tm.Sql.SetupConnections(new Dictionary<string, string> { { "WORKSPACE", "tester" } });
-            tm.Sql.QueueSql("Test.Create_CT_Rule", new Dictionary<string, object> { { "Test_Replace", 6 }, { "Test_Replace2", "New Boom" } });
+            tm.Sql.QueueLibraryItem("Test.Create_CT_Rule", new Dictionary<string, object> { { "Test_Replace", 6 }, { "Test_Replace2", "New Boom" } });
 
             Assert.IsTrue(tm.Sql.QueuedSql.Count == 1);
             Assert.IsTrue(tm.Sql.QueuedSql.First().Value.ToString() == "\r\n\r\nSelect 6,name,'New Boom' from sys.databases\r\n");

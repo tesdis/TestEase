@@ -67,7 +67,7 @@
         /// <returns>
         /// Dynamic object containing the result sets of each queued sql statement
         /// </returns>
-        public dynamic ExecuteSql()
+        public dynamic Execute()
         {
             var results = new List<ExpandoObject>();
 
@@ -87,7 +87,7 @@
         }
 
         /// <summary>
-        /// Queue a sql statement to be executed
+        /// QueueLibraryItem a sql statement to be executed
         /// </summary>
         /// <param name="scriptKey">
         /// Key of the script to queue.
@@ -106,7 +106,7 @@
         /// <exception cref="DirectoryNotFoundException">The specified path is invalid, such as being on an unmapped drive. </exception>
         /// <exception cref="UnauthorizedAccessException">The requested is not permitted by the operating system for the specified path, such as when <see cref="FileAccess"/> is Write or ReadWrite and the file or directory is set for read-only access. </exception>
         /// <exception cref="OutOfMemoryException">There is insufficient memory to allocate a buffer for the returned string. </exception>
-        public SqlItemDictionary QueueSql(string scriptKey, IDictionary<string, object> replacementValues = null)
+        public SqlItemDictionary QueueLibraryItem(string scriptKey, IDictionary<string, object> replacementValues = null)
         {
             if (this.connections.Keys.Count <= 0)
             {
@@ -126,8 +126,35 @@
                 var connectionType = scripts[i];
                 var sqlCode = scripts[i + 1];
 
-                this.QueueSql(connectionType, sqlCode, replacementValues);
+                this.Queue(connectionType, sqlCode, replacementValues);
             }
+
+            return this;
+        }
+
+        /// <summary>
+        /// Queues a SQL statement
+        /// </summary>
+        /// <param name="connectionName">
+        /// Connection name that should be used
+        /// </param>
+        /// <param name="sqlToQueue">
+        /// Sql script/statement to queue
+        /// </param>
+        /// <returns>
+        /// The <see cref="SqlItemDictionary"/>.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// The connections have not been configured
+        /// </exception>
+        public SqlItemDictionary QueueSql(string connectionName, string sqlToQueue)
+        {
+            if (this.connections.Keys.Count <= 0)
+            {
+                throw new ArgumentException("This flavor can only be run if you pre-configure the connections.");
+            }
+
+            this.Queue(connectionName, sqlToQueue);
 
             return this;
         }
@@ -174,7 +201,7 @@
         /// <param name="replacementValues">
         /// Any replacement values that should - name/value
         /// </param>
-        private void QueueSql(
+        private void Queue(
             string connectionName,
             string sqlCode,
             IDictionary<string, object> replacementValues = null)
