@@ -22,7 +22,7 @@
         /// <summary>
         /// Sql that is queued and ready to be executed
         /// </summary>
-        public readonly IDictionary<string, StringBuilder> QueuedSql = new Dictionary<string, StringBuilder>();
+        public readonly IDictionary<string, StringBuilder> GetQueuedSql = new Dictionary<string, StringBuilder>();
 
         /// <summary>
         /// Connection mappings used to execute sql scripts
@@ -71,16 +71,16 @@
         {
             var results = new List<ExpandoObject>();
 
-            foreach (var queuedSqlKey in this.QueuedSql.Keys)
+            foreach (var queuedSqlKey in this.GetQueuedSql.Keys)
             {
-                if (this.QueuedSql[queuedSqlKey].Length <= 0)
+                if (this.GetQueuedSql[queuedSqlKey].Length <= 0)
                 {
                     continue;
                 }
 
-                results.AddRange(this.RunSql(queuedSqlKey, this.QueuedSql[queuedSqlKey].ToString()));
+                results.AddRange(this.RunSql(queuedSqlKey, this.GetQueuedSql[queuedSqlKey].ToString()));
 
-                this.QueuedSql[queuedSqlKey].Clear();
+                this.GetQueuedSql[queuedSqlKey].Clear();
             }
 
             return results;
@@ -206,14 +206,14 @@
             string sqlCode,
             IDictionary<string, object> replacementValues = null)
         {
-            if (!this.QueuedSql.ContainsKey(connectionName))
+            if (!this.GetQueuedSql.ContainsKey(connectionName))
             {
-                this.QueuedSql.Add(connectionName, new StringBuilder());
+                this.GetQueuedSql.Add(connectionName, new StringBuilder());
             }
 
             var parsedSql = ItemParser.Parse(sqlCode, replacementValues, this);
 
-            this.QueuedSql[connectionName].AppendLine(parsedSql);
+            this.GetQueuedSql[connectionName].AppendLine(parsedSql);
         }
 
         /// <summary>

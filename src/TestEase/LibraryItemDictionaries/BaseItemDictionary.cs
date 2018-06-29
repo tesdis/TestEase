@@ -35,7 +35,14 @@
             key = key.Replace("\\", ".");
             key = key.Replace(file.Extension, string.Empty);
 
-            this.Add(key, new LibraryItem(file));
+            if (!this.ContainsKey(key))
+            {
+                this.Add(key, new LibraryItem(file));
+            }
+            else
+            {
+                // TODO Should log that we ignore items already added
+            }
         }
 
         /// <summary>
