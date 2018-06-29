@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>TestEase</id>
+    <version>$version$</version>
+    <title>TestEase</title>
+    <authors>Joel Sparks (joskraps@gmail.com)</authors>
+    <owners>Joel Sparks (joskraps@gmail.com)</owners>
+    <projectUrl>https://github.com/tesdis/TestEase</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Test data provider and helper</description>
+    <copyright>Copyright 2018</copyright>
+    <tags>Test Data Library</tags>
+  </metadata>
+</package>

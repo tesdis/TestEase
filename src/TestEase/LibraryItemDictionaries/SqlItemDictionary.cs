@@ -141,6 +141,28 @@
         public void SetupConnections(IDictionary<string, string> connectionsToAdd) => this.connections = connectionsToAdd;
 
         /// <summary>
+        /// Get the raw connection string for a given key
+        /// </summary>
+        /// <param name="key">
+        /// Key of the connection to retrieve
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// The connection does not exist for the given key
+        /// </exception>
+        public string GetConnection(string key)
+        {
+            if (this.connections.ContainsKey(key))
+            {
+                return this.connections[key];
+            }
+
+            throw new ArgumentException($"Connection was not found for key {key}");
+        }
+
+        /// <summary>
         /// Queues a sql string to be executed
         /// </summary>
         /// <param name="connectionName">
