@@ -211,9 +211,7 @@
                 this.GetQueuedSql.Add(connectionName, new StringBuilder());
             }
 
-            var parsedSql = ItemParser.Parse(sqlCode, replacementValues, this);
-
-            this.GetQueuedSql[connectionName].AppendLine(parsedSql);
+            this.GetQueuedSql[connectionName].AppendLine(sqlCode);
         }
 
         /// <summary>
