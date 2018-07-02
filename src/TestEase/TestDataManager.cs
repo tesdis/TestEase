@@ -145,8 +145,7 @@
         private IEnumerable<string> GetTestLibraryFolders(int depthLimit = 5)
         {
             var projectPath = new DirectoryInfo(
-                Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath)
-                ?? throw new InvalidOperationException());
+                Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath));
 
             var returnPaths = new List<string>();
             var rootPath = projectPath.FullName;

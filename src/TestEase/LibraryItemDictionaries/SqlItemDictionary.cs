@@ -51,7 +51,7 @@
 
             foreach (var connectionsKey in connections.Keys)
             {
-                this.connections.Add(connectionsKey, connections[connectionsKey]);
+                this.connections.Add(connectionsKey.ToUpper(), connections[connectionsKey]);
             }
         }
 
@@ -78,7 +78,7 @@
                     continue;
                 }
 
-                results.AddRange(this.RunSql(queuedSqlKey, this.GetQueuedSql[queuedSqlKey].ToString()));
+                results.AddRange(this.RunSql(connections[queuedSqlKey.ToUpper()], this.GetQueuedSql[queuedSqlKey].ToString()));
 
                 this.GetQueuedSql[queuedSqlKey].Clear();
             }
@@ -114,16 +114,18 @@
             }
 
             var sql = this[scriptKey].LibraryItemText;
+
             sql = ItemParser.Parse(sql, replacementValues, this);
 
+            var scriptSplitter = string.Join("|", this.connections.Select(x => x.Key));
             var scripts = Regex.Split(
                 sql,
-                $"--DbType \\s*=\\s* ({string.Join("|", this.connections.Select(x => x.Key))})",
+                $"--DbType \\s*=\\s* ({scriptSplitter})",
                 RegexOptions.IgnorePatternWhitespace);
 
             for (var i = 1; i < scripts.Length; i += 2)
             {
-                var connectionType = scripts[i];
+                var connectionType = scripts[i].ToUpper();
                 var sqlCode = scripts[i + 1];
 
                 this.Queue(connectionType, sqlCode, replacementValues);
@@ -165,7 +167,21 @@
         /// <param name="connectionsToAdd">
         /// Keyed collection of connections to use where the key is the name/alias and the value is the connection string
         /// </param>
-        public void SetupConnections(IDictionary<string, string> connectionsToAdd) => this.connections = connectionsToAdd;
+        public void SetupConnections(IDictionary<string, string> connectionsToAdd)
+        {
+            foreach (var key in connectionsToAdd.Keys)
+            {
+                if (connections.ContainsKey(key.ToUpper()))
+                {
+                    connections[key.ToUpper()] = connectionsToAdd[key];
+                }
+                else
+                {
+                    connections.Add(key.ToUpper(), connectionsToAdd[key]);
+                }
+
+            }
+        }
 
         /// <summary>
         /// Get the raw connection string for a given key
@@ -211,9 +227,7 @@
                 this.GetQueuedSql.Add(connectionName, new StringBuilder());
             }
 
-            var parsedSql = ItemParser.Parse(sqlCode, replacementValues, this);
-
-            this.GetQueuedSql[connectionName].AppendLine(parsedSql);
+            this.GetQueuedSql[connectionName].AppendLine(sqlCode);
         }
 
         /// <summary>
@@ -235,10 +249,15 @@
 
             try
             {
-                foreach (var batch in sql.Split(new[] { "GO" }, StringSplitOptions.None))
+                connection.Open();
+                using (connection)
                 {
-                    results.AddRange(this.RunIt(batch, connection));
+                    foreach (var batch in sql.Split(new[] { "GO" }, StringSplitOptions.None))
+                    {
+                        results.AddRange(this.RunIt(batch, connection));
+                    }
                 }
+
             }
             catch (Exception ex)
             {
