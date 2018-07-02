@@ -286,15 +286,19 @@
                 }
                 else
                 {
-                    if (bool.TryParse(value, out var boolVal))
+                    bool boolVal;
+                    int intVal;
+                    double doubleVal;
+
+                    if (bool.TryParse(value, out boolVal))
                     {
                         newValue = boolVal;
                     }
-                    else if (int.TryParse(value, out var intVal))
+                    else if (int.TryParse(value, out intVal))
                     {
                         newValue = intVal;
                     }
-                    else if (double.TryParse(value, out var doubleVal))
+                    else if (double.TryParse(value, out doubleVal))
                     {
                         newValue = doubleVal;
                     }
