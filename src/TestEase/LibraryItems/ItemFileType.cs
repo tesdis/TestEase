@@ -10,7 +10,6 @@
         Sql,
         Xml,
         Json,
-        Text,
-        Config
+        Text
     }
 }

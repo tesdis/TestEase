@@ -47,6 +47,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\MSTest.TestFramework.1.3.2\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
     </Reference>
@@ -55,10 +56,13 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FileDiscoveryTests.cs" />
+    <Compile Include="ItemDictionaryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SqlDictionaryTests.cs" />
     <Compile Include="SqlItemTypeTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -73,6 +77,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="_TestDataLibrary\Test\TestSqlSimpleInclude.sql" />
+    <Content Include="_TestDataLibrary\Test\TestSqlWithBadInclude.sql" />
+    <Content Include="_TestDataLibrary\Test\TestSqlWithIncludesNoDefaults.sql" />
+    <Content Include="_TestDataLibrary\Test\TestSqlWithIncludes_NoReplacements.sql" />
+    <Content Include="_TestDataLibrary\Test\TestSqlWithIncludes.sql" />
+    <Content Include="_TestDataLibrary\Test\TestSqlWithBadDbType.sql" />
+    <Content Include="_TestDataLibrary\Test\TestSql.sql" />
     <None Include="packages.config" />
     <None Include="_TestDataLibrary\Test\TestJson.json" />
     <Content Include="_TestDataLibrary\Test\TestText.txt" />

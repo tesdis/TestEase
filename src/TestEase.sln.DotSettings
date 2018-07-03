@@ -2,4 +2,5 @@
 	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=CE55C28C200B38498C6ED78CFCCCDE31/RelativePath/@EntryValue">..\projectsettings.DotSettings</s:String>
 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=CE55C28C200B38498C6ED78CFCCCDE31/@KeyIndexDefined">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=FileCE55C28C200B38498C6ED78CFCCCDE31/@KeyIndexDefined">True</s:Boolean>
-	<s:Double x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=FileCE55C28C200B38498C6ED78CFCCCDE31/RelativePriority/@EntryValue">1</s:Double></wpf:ResourceDictionary>
+	<s:Double x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=FileCE55C28C200B38498C6ED78CFCCCDE31/RelativePriority/@EntryValue">1</s:Double>
+	<s:String x:Key="/Default/FilterSettingsManager/CoverageFilterXml/@EntryValue">&lt;data&gt;&lt;IncludeFilters /&gt;&lt;ExcludeFilters&gt;&lt;Filter ModuleMask="TestEase.Tests" ModuleVersionMask="*" ClassMask="*" FunctionMask="*" IsEnabled="True" /&gt;&lt;/ExcludeFilters&gt;&lt;/data&gt;</s:String></wpf:ResourceDictionary>

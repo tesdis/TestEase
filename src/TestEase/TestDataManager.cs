@@ -16,6 +16,11 @@
     public class TestDataManager
     {
         /// <summary>
+        /// Dictionaries that are configured
+        /// </summary>
+        public readonly ItemDictionaryCollection Dictionaries = new ItemDictionaryCollection();
+
+        /// <summary>
         /// Domain key to be used for global library
         /// </summary>
         private const string DomainKey = "TestDataManager";
@@ -31,20 +36,12 @@
         private readonly IList<string> libraryPaths = new List<string>();
 
         /// <summary>
-        /// Dictionaries that are configured
-        /// </summary>
-        private readonly ItemDictionaryCollection dictionaries = new ItemDictionaryCollection();
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="TestDataManager"/> class.
         /// </summary>
-        /// <param name="pathsToSearch">
-        /// The paths to search.
-        /// </param>
         /// <exception cref="AppDomainUnloadedException">The operation is attempted on an unloaded application domain. </exception>
         /// <exception cref="System.Security.SecurityException">The caller does not have the required permission. </exception>
         /// <exception cref="DirectoryNotFoundException">The path is invalid (for example, it is on an unmapped drive). </exception>
-        public TestDataManager(IList<string> pathsToSearch = null)
+        public TestDataManager()
         {
             if (AppDomain.CurrentDomain.GetData(DomainKey) == null)
             {
@@ -54,17 +51,6 @@
             this.libraryFolderKey = ConfigurationManager.AppSettings["libraryFolderName"] ?? "_TestDataLibrary";
 
             this.InitItemDictionaries();
-
-            if (pathsToSearch != null)
-            {
-                foreach (var libraryPath in pathsToSearch)
-                {
-                    if (!this.libraryPaths.Contains(libraryPath))
-                    {
-                        this.libraryPaths.Add(libraryPath);
-                    }
-                }
-            }
 
             var sharedPaths = ConfigurationManager.AppSettings["sharedPaths"];
 
@@ -89,7 +75,7 @@
                 }
             }
 
-            var validExtensions = this.dictionaries.Values.Select(itemDic => itemDic.FileExtension).ToList();
+            var validExtensions = this.Dictionaries.Values.Select(itemDic => itemDic.FileExtension).ToList();
             var files = new List<FileInfo>();
 
             foreach (var path in this.libraryPaths)
@@ -113,44 +99,40 @@
         /// Json item dictionary helper
         /// </summary>
         public JsonItemDictionary Json =>
-            (JsonItemDictionary)this.dictionaries[this.dictionaries.ExtensionMappings[ItemFileType.Json]];
+            (JsonItemDictionary)this.Dictionaries[this.Dictionaries.ExtensionMappings[ItemFileType.Json]];
 
         /// <summary>
         /// Sql item dictionary helper
         /// </summary>
-        public SqlItemDictionary Sql =>
-            (SqlItemDictionary)this.dictionaries[this.dictionaries.ExtensionMappings[ItemFileType.Sql]];
+        public SqlItemDictionary Sql => (SqlItemDictionary)this.Dictionaries[this.Dictionaries.ExtensionMappings[ItemFileType.Sql]];
 
         /// <summary>
         /// Text item dictionary helper
         /// </summary>
         public TextItemDictionary Text =>
-            (TextItemDictionary)this.dictionaries[this.dictionaries.ExtensionMappings[ItemFileType.Text]];
+            (TextItemDictionary)this.Dictionaries[this.Dictionaries.ExtensionMappings[ItemFileType.Text]];
 
         /// <summary>
         /// Xml item dictionary helper
         /// </summary>
         public XmlItemDictionary Xml =>
-            (XmlItemDictionary)this.dictionaries[this.dictionaries.ExtensionMappings[ItemFileType.Xml]];
+            (XmlItemDictionary)this.Dictionaries[this.Dictionaries.ExtensionMappings[ItemFileType.Xml]];
 
         /// <summary>
         /// Searches for library item folders. Searches up to five levels by default
         /// </summary>
-        /// <param name="depthLimit">
-        /// Optional depth limit to search up from the working folder
-        /// </param>
         /// <returns>
         /// Collection of string library paths
         /// </returns>
-        private IEnumerable<string> GetTestLibraryFolders(int depthLimit = 5)
+        private IEnumerable<string> GetTestLibraryFolders()
         {
             var projectPath = new DirectoryInfo(
-                Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath));
+                Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().CodeBase).LocalPath) ?? throw new InvalidOperationException());
 
             var returnPaths = new List<string>();
             var rootPath = projectPath.FullName;
 
-            for (var i = 0; i < depthLimit; i++)
+            while (true)
             {
                 var currentDi = new DirectoryInfo(rootPath);
                 var dirs = Directory.GetDirectories(rootPath);
@@ -174,10 +156,10 @@
         /// </summary>
         private void InitItemDictionaries()
         {
-            this.dictionaries.Register<SqlItemDictionary>();
-            this.dictionaries.Register<XmlItemDictionary>();
-            this.dictionaries.Register<JsonItemDictionary>();
-            this.dictionaries.Register<TextItemDictionary>();
+            this.Dictionaries.Register<SqlItemDictionary>();
+            this.Dictionaries.Register<XmlItemDictionary>();
+            this.Dictionaries.Register<JsonItemDictionary>();
+            this.Dictionaries.Register<TextItemDictionary>();
         }
 
         /// <summary>
@@ -186,16 +168,15 @@
         /// <param name="files">
         /// Files to be filtered and added to dictionaries
         /// </param>
-        private void SetupLibraryDictionaries(List<FileInfo> files)
+        private void SetupLibraryDictionaries(IEnumerable<FileInfo> files)
         {
-            files.ForEach(
-                f =>
-                    {
-                        if (this.dictionaries.ContainsKey(f.Extension))
-                        {
-                            this.dictionaries[f.Extension].AddFileInfo(f);
-                        }
-                    });
+            foreach (var f in files)
+            {
+                if (this.Dictionaries.ContainsKey(f.Extension))
+                {
+                    this.Dictionaries[f.Extension].AddFileInfo(f);
+                }
+            }
         }
     }
 }

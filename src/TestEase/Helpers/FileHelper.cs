@@ -26,13 +26,15 @@
         /// <exception cref="DirectoryNotFoundException">The specified path is invalid, such as being on an unmapped drive. </exception>
         /// <exception cref="UnauthorizedAccessException">The requested is not permitted by the operating system for the specified <paramref name="path" />, such as when <see cref="FileAccess"/> is Write or ReadWrite and the file or directory is set for read-only access. </exception>
         /// <exception cref="OutOfMemoryException">There is insufficient memory to allocate a buffer for the returned string. </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="path" /> is an empty string (""), contains only white space, or contains one or more invalid characters. -or-<paramref name="path" /> refers to a non-file device, such as "con:", "com1:", "lpt1:", etc. in an NTFS environment.</exception>
+        /// <exception cref="NotSupportedException">
+        /// <paramref name="path" /> refers to a non-file device, such as "con:", "com1:", "lpt1:", etc. in a non-NTFS environment.</exception>
+        /// <exception cref="PathTooLongException">The specified path, file name, or both exceed the system-defined maximum length. For example, on Windows-based platforms, paths must be less than 248 characters, and file names must be less than 260 characters. </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <see cref="System.IO.FileMode"/> contains an invalid value. </exception>
         public static string GetFileContents(string path)
         {
-            if (!File.Exists(path))
-            {
-                return null;
-            }
-
             var fs = new FileStream(path, FileMode.Open, FileAccess.Read);
             var reader = new StreamReader(fs);
 

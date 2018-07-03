@@ -2,6 +2,7 @@
 {
     using TestEase.LibraryItems;
 
+    /// <inheritdoc />
     /// <summary>
     /// The json item dictionary.
     /// </summary>

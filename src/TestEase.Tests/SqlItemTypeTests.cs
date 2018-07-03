@@ -20,6 +20,7 @@
             tm.Sql.QueueLibraryItem("Test.Create_CT_Rule");
 
             Assert.IsTrue(tm.Sql.GetQueuedSql.Count == 1);
+
             Assert.IsTrue(tm.Sql.GetQueuedSql.First().Value.ToString() == "\r\n\r\nSelect 1,name,'Boom' from sys.databases\r\n");
         }
 

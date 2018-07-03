@@ -5,6 +5,7 @@
 
     using TestEase.LibraryItems;
 
+    /// <inheritdoc />
     /// <summary>
     /// Collection of item dictionaries and helper for registering
     /// </summary>
@@ -39,20 +40,19 @@
             {
                 if (!overrideRegistration)
                 {
-                    throw new ArgumentException("Dictionary already registered and override is disabled");
+                    throw new ArgumentException($"Dictionary already registered and override is disabled. Dictionary type: {instance.FileExtension}");
                 }
 
                 this[instance.FileExtension] = instance;
+            }
+            else
+            {
+                this.Add(instance.FileExtension, instance);
 
                 if (!this.ExtensionMappings.ContainsKey(instance.FileType))
                 {
                     this.ExtensionMappings.Add(instance.FileType, instance.FileExtension);
                 }
-            }
-            else
-            {
-                this.Add(instance.FileExtension, instance);
-                this.ExtensionMappings.Add(instance.FileType, instance.FileExtension);
             }
         }
     }

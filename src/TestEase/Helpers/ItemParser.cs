@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Dynamic;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -64,7 +63,7 @@
         /// </returns>
         private static string ProcessIncludeStatements(string libraryItemText, BaseItemDictionary itemDictionary)
         {
-            var includeStatementPattern = @"
+            const string IncludeStatementPattern = @"
                     INCLUDE 
 
                     \s+
@@ -89,7 +88,7 @@
                 ";
 
             var includeStatementRegex = new Regex(
-                includeStatementPattern,
+                IncludeStatementPattern,
                 RegexOptions.IgnorePatternWhitespace | RegexOptions.IgnoreCase);
 
             return includeStatementRegex.Replace(
@@ -132,12 +131,6 @@
                         {
                             // Just a plain INCLUDE statement with no JSON-style replacement values. E.g.: INCLUDE Some.Stuff
                             newIncludeLibraryItem = ProcessReplacementValues(includeLibraryItem, null);
-                        }
-
-                        if (Debugger.IsAttached)
-                        {
-                            newIncludeLibraryItem = "\r\n\r\n--INCLUDED from " + includedLibraryItemName + "\r\n\r\n"
-                                                    + newIncludeLibraryItem + "\r\n\r\n--END INCLUDE\r\n\r\n";
                         }
 
                         // Recursively process all include statements
@@ -187,7 +180,7 @@
 
                         foreach (var replacementKvp in finalReplacementValues)
                         {
-                            if (replacementKvp.Key.ToLower() == replacementValueName.ToLower())
+                            if (string.Equals(replacementKvp.Key, replacementValueName, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 key = replacementKvp.Key;
                             }
@@ -195,23 +188,11 @@
 
                         if (key == string.Empty)
                         {
-                            throw new InvalidOperationException(
+                            throw new ArgumentException(
                                 $"A replacement value was not specified for {replacementValueName}. \n\n {text}");
                         }
 
-                        string newValue;
-
-                        try
-                        {
-                            newValue = finalReplacementValues[key].ToString();
-                        }
-                        catch (Exception exception)
-                        {
-                            throw new InvalidOperationException(
-                                $@"Replacement value ""{replacementValueName}"" could not be converted into a string. \n\n {text}", exception);
-                        }
-
-                        return newValue;
+                        return finalReplacementValues[key].ToString();
                     });
 
             return libraryItemText;
@@ -286,24 +267,9 @@
                 }
                 else
                 {
-                    bool boolVal;
-                    int intVal;
-                    double doubleVal;
-
-                    if (bool.TryParse(value, out boolVal))
+                    if (value != "null")
                     {
-                        newValue = boolVal;
-                    }
-                    else if (int.TryParse(value, out intVal))
-                    {
-                        newValue = intVal;
-                    }
-                    else if (double.TryParse(value, out doubleVal))
-                    {
-                        newValue = doubleVal;
-                    }
-                    else if (value == "null")
-                    {
+                        newValue = value;
                     }
                 }
 
