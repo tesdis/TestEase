@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NUnit.Framework;
 
 namespace TestEase.Tests
 {
     using System.Diagnostics.CodeAnalysis;
 
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    using TestEase.LibraryItemDictionaries;
+    using LibraryItemDictionaries;
 
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
-    [TestClass]
     public class ItemDictionaryTests
     {
 
-        [TestMethod]
+        [Test]
         public void DuplicateRegistrationAndNoOverrideTest()
         {
             var tm = new TestDataManager();
@@ -27,10 +25,10 @@ namespace TestEase.Tests
                 tm.Dictionaries.Register<SqlItemDictionary>();
             }
 
-            Assert.ThrowsException<ArgumentException>((Action)RegisterAction, "Dictionary already registered and override is disabled. Dictionary type: .sql");
+            Assert.Throws<ArgumentException>((TestDelegate) RegisterAction, "Dictionary already registered and override is disabled. Dictionary type: .sql");
         }
 
-        [TestMethod]
+        [Test]
         public void OverrideRegistrationTest()
         {
             var tm = new TestDataManager();
@@ -41,7 +39,7 @@ namespace TestEase.Tests
             Assert.AreSame(newDic, tm.Sql);
         }
 
-        [TestMethod]
+        [Test]
         public void RegistrationWithInstanceAndNoOverrideTest()
         {
             var tm = new TestDataManager();
@@ -54,10 +52,10 @@ namespace TestEase.Tests
             }
 
 
-            Assert.ThrowsException<ArgumentException>((Action)RegisterAction, "Dictionary already registered and override is disabled. Dictionary type: .sql");
+            Assert.Throws<ArgumentException>(RegisterAction, "Dictionary already registered and override is disabled. Dictionary type: .sql");
         }
 
-        [TestMethod]
+        [Test]
         public void RegistrationWithInstanceTest()
         {
             var tm = new TestDataManager();

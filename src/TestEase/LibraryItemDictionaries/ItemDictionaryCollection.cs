@@ -3,7 +3,7 @@
     using System;
     using System.Collections.Generic;
 
-    using TestEase.LibraryItems;
+    using LibraryItems;
 
     /// <inheritdoc />
     /// <summary>
@@ -36,7 +36,7 @@
         {
             var instance = dictionary ?? new T();
 
-            if (this.ContainsKey(instance.FileExtension))
+            if (ContainsKey(instance.FileExtension))
             {
                 if (!overrideRegistration)
                 {
@@ -47,11 +47,11 @@
             }
             else
             {
-                this.Add(instance.FileExtension, instance);
+                Add(instance.FileExtension, instance);
 
-                if (!this.ExtensionMappings.ContainsKey(instance.FileType))
+                if (!ExtensionMappings.ContainsKey(instance.FileType))
                 {
-                    this.ExtensionMappings.Add(instance.FileType, instance.FileExtension);
+                    ExtensionMappings.Add(instance.FileType, instance.FileExtension);
                 }
             }
         }

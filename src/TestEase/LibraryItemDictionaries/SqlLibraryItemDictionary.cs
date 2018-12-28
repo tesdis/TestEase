@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Text.RegularExpressions;
 using TestEase.LibraryItems;
 
-namespace TestEase.LibrarItemDictionaries
+namespace TestEase.LibraryItemDictionaries
 {
-    public class SqlLibraryItemDictionary : LibraryItemDictionary<SqlLibraryItem>
+    public class SqlLibraryItemDictionary : SqlItemDictionary
     {
         public SqlLibraryItemDictionary()
         {
             AutoCommitTransaction = true;
         }
 
-        public new SqlLibraryItem this[string key]
+        public new LibraryItem this[string key]
         {
             get
             {
@@ -33,7 +32,7 @@ namespace TestEase.LibrarItemDictionaries
 
         public bool AutoCommitTransaction { get; set; }
 
-        public new void Add(string key, SqlLibraryItem value)
+        public new void Add(string key, LibraryItem value)
         {
             value.MyDictionary = this;
             base.Add(key, value);

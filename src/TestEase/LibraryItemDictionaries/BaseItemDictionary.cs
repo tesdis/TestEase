@@ -5,7 +5,7 @@
     using System.Configuration;
     using System.IO;
 
-    using TestEase.LibraryItems;
+    using LibraryItems;
 
     /// <inheritdoc cref="IItemDictionary" />
     /// <summary>
@@ -36,9 +36,9 @@
             key = key.Replace("\\", ".");
             key = key.Replace(file.Extension, string.Empty);
 
-            if (!this.ContainsKey(key))
+            if (!ContainsKey(key))
             {
-                this.Add(key, new LibraryItem(file));
+                Add(key, new LibraryItem(file));
             }
         }
     }

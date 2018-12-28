@@ -1,0 +1,24 @@
+﻿pool:
+  vmImage: vs2017-win2016
+variables:
+  buildConfiguration: Release
+steps:
+  - script: >
+      dotnet build --configuration $(buildConfiguration)
+
+      dotnet test TestEase.Tests --configuration $(buildConfiguration) --logger trx
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testRunner: VSTest
+      testResultsFiles: '**/*.trx'
+  - task: DotNetCoreCLI@2
+    condition: succeededOrFailed()
+    inputs:
+      command: pack
+      configuration: $(buildConfiguration)
+      packagesToPack: '**/TestEase.csproj'
+      versioningScheme: byEnvVar
+      versionEnvVar: Build.BuildNumber
+      verbosityPack: detailed
+  - task: PublishBuildArtifacts@1

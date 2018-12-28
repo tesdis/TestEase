@@ -1,17 +1,16 @@
-﻿namespace TestEase.Tests
+﻿using NUnit.Framework;
+
+namespace TestEase.Tests
 {
     // ReSharper disable ExceptionNotDocumented
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
-    [TestClass]
     public class SqlItemTypeTests
     {
-        [TestMethod]
+        [Test]
         public void TestQueueWithDefaultReplacements()
         {
             var tm = new TestDataManager();
@@ -24,7 +23,7 @@
             Assert.IsTrue(tm.Sql.GetQueuedSql.First().Value.ToString() == "\r\n\r\nSelect 1,name,'Boom' from sys.databases\r\n");
         }
 
-        [TestMethod]
+        [Test]
         public void TestQueueWithReplacements()
         {
             var tm = new TestDataManager();
@@ -36,7 +35,7 @@
             Assert.IsTrue(tm.Sql.GetQueuedSql.First().Value.ToString() == "\r\n\r\nSelect 2,name,'Boom' from sys.databases\r\n");
         }
 
-        [TestMethod]
+        [Test]
         public void TestQueueWithMultipleReplacements()
         {
             var tm = new TestDataManager();

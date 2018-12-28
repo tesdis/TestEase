@@ -1,11 +1,13 @@
-﻿namespace TestEase.LibraryItems
+﻿using TestEase.LibraryItemDictionaries;
+
+namespace TestEase.LibraryItems
 {
     // ReSharper disable ExceptionNotThrown
     using System;
     using System.IO;
     using System.Security;
 
-    using TestEase.Helpers;
+    using Helpers;
 
     /// <summary>
     /// Wrapper for each library item
@@ -26,7 +28,7 @@
         /// <exception cref="SecurityException">The caller does not have the required permission. </exception>
         public LibraryItem(FileSystemInfo fileInfo)
         {
-            this.ItemFilePath = fileInfo.FullName;
+            ItemFilePath = fileInfo.FullName;
         }
 
         /// <summary>
@@ -39,11 +41,13 @@
         /// <exception cref="UnauthorizedAccessException">The requested is not permitted by the operating system for the specified path, such as when <see cref="FileAccess"/> is Write or ReadWrite and the file or directory is set for read-only access. </exception>
         /// <exception cref="OutOfMemoryException">There is insufficient memory to allocate a buffer for the returned string. </exception>
         public string LibraryItemText =>
-            this.libraryItemText ?? (this.libraryItemText = FileHelper.GetFileContents(this.ItemFilePath));
+            libraryItemText ?? (libraryItemText = FileHelper.GetFileContents(ItemFilePath));
 
         /// <summary>
         /// Gets or sets the item file path.
         /// </summary>
         public string ItemFilePath { get; set; }
+
+        public IItemDictionary MyDictionary { get; set; }
     }
 }

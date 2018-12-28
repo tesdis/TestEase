@@ -6,7 +6,7 @@
     using System.Text;
     using System.Text.RegularExpressions;
 
-    using TestEase.LibraryItemDictionaries;
+    using LibraryItemDictionaries;
 
     /// <summary>
     /// Responsible for parsing and replacing macro values in library items

@@ -7,8 +7,8 @@
     using System.Linq;
     using System.Reflection;
 
-    using TestEase.LibraryItemDictionaries;
-    using TestEase.LibraryItems;
+    using LibraryItemDictionaries;
+    using LibraryItems;
 
     /// <summary>
     /// Coordinates the setup and retrieval of item dictionaries
@@ -48,9 +48,9 @@
                 AppDomain.CurrentDomain.SetData(DomainKey, this);
             }
 
-            this.libraryFolderKey = ConfigurationManager.AppSettings["libraryFolderName"] ?? "_TestDataLibrary";
+            libraryFolderKey = ConfigurationManager.AppSettings["libraryFolderName"] ?? "_TestDataLibrary";
 
-            this.InitItemDictionaries();
+            InitItemDictionaries();
 
             var sharedPaths = ConfigurationManager.AppSettings["sharedPaths"];
 
@@ -58,27 +58,27 @@
             {
                 foreach (var s in sharedPaths.Split(','))
                 {
-                    if (!this.libraryPaths.Contains(s))
+                    if (!libraryPaths.Contains(s))
                     {
-                        this.libraryPaths.Add(s);
+                        libraryPaths.Add(s);
                     }
                 }
             }
 
-            var libraryFolderPaths = this.GetTestLibraryFolders();
+            var libraryFolderPaths = GetTestLibraryFolders();
 
             foreach (var s in libraryFolderPaths)
             {
-                if (!this.libraryPaths.Contains(s))
+                if (!libraryPaths.Contains(s))
                 {
-                    this.libraryPaths.Add(s);
+                    libraryPaths.Add(s);
                 }
             }
 
-            var validExtensions = this.Dictionaries.Values.Select(itemDic => itemDic.FileExtension).ToList();
+            var validExtensions = Dictionaries.Values.Select(itemDic => itemDic.FileExtension).ToList();
             var files = new List<FileInfo>();
 
-            foreach (var path in this.libraryPaths)
+            foreach (var path in libraryPaths)
             {
                 if (!Directory.Exists(path))
                 {
@@ -92,31 +92,31 @@
                 files.AddRange(matchedFiles);
             }
 
-            this.SetupLibraryDictionaries(files);
+            SetupLibraryDictionaries(files);
         }
 
         /// <summary>
         /// Json item dictionary helper
         /// </summary>
         public JsonItemDictionary Json =>
-            (JsonItemDictionary)this.Dictionaries[this.Dictionaries.ExtensionMappings[ItemFileType.Json]];
+            (JsonItemDictionary)Dictionaries[Dictionaries.ExtensionMappings[ItemFileType.Json]];
 
         /// <summary>
         /// Sql item dictionary helper
         /// </summary>
-        public SqlItemDictionary Sql => (SqlItemDictionary)this.Dictionaries[this.Dictionaries.ExtensionMappings[ItemFileType.Sql]];
+        public SqlItemDictionary Sql => (SqlItemDictionary)Dictionaries[Dictionaries.ExtensionMappings[ItemFileType.Sql]];
 
         /// <summary>
         /// Text item dictionary helper
         /// </summary>
         public TextItemDictionary Text =>
-            (TextItemDictionary)this.Dictionaries[this.Dictionaries.ExtensionMappings[ItemFileType.Text]];
+            (TextItemDictionary)Dictionaries[Dictionaries.ExtensionMappings[ItemFileType.Text]];
 
         /// <summary>
         /// Xml item dictionary helper
         /// </summary>
         public XmlItemDictionary Xml =>
-            (XmlItemDictionary)this.Dictionaries[this.Dictionaries.ExtensionMappings[ItemFileType.Xml]];
+            (XmlItemDictionary)Dictionaries[Dictionaries.ExtensionMappings[ItemFileType.Xml]];
 
         /// <summary>
         /// Searches for library item folders. Searches up to five levels by default
@@ -138,7 +138,7 @@
                 var dirs = Directory.GetDirectories(rootPath);
 
                 returnPaths.AddRange(
-                    dirs.Where(dir => dir.Substring(dir.LastIndexOf('\\') + 1) == this.libraryFolderKey));
+                    dirs.Where(dir => dir.Substring(dir.LastIndexOf('\\') + 1) == libraryFolderKey));
 
                 if (currentDi.Parent == null)
                 {
@@ -156,10 +156,10 @@
         /// </summary>
         private void InitItemDictionaries()
         {
-            this.Dictionaries.Register<SqlItemDictionary>();
-            this.Dictionaries.Register<XmlItemDictionary>();
-            this.Dictionaries.Register<JsonItemDictionary>();
-            this.Dictionaries.Register<TextItemDictionary>();
+            Dictionaries.Register<SqlItemDictionary>();
+            Dictionaries.Register<XmlItemDictionary>();
+            Dictionaries.Register<JsonItemDictionary>();
+            Dictionaries.Register<TextItemDictionary>();
         }
 
         /// <summary>
@@ -172,9 +172,9 @@
         {
             foreach (var f in files)
             {
-                if (this.Dictionaries.ContainsKey(f.Extension))
+                if (Dictionaries.ContainsKey(f.Extension))
                 {
-                    this.Dictionaries[f.Extension].AddFileInfo(f);
+                    Dictionaries[f.Extension].AddFileInfo(f);
                 }
             }
         }

@@ -9,8 +9,8 @@
     using System.Text;
     using System.Text.RegularExpressions;
 
-    using TestEase.Helpers;
-    using TestEase.LibraryItems;
+    using Helpers;
+    using LibraryItems;
 
     /// <inheritdoc />
     /// <summary>
@@ -44,23 +44,23 @@
         /// <exception cref="ArgumentException">No sql is currently queued</exception>
         public dynamic Execute()
         {
-            if (this.GetQueuedSql.Count == 0)
+            if (GetQueuedSql.Count == 0)
             {
                 throw new ArgumentException("No sql is currently queued");
             }
 
             var results = new List<ExpandoObject>();
 
-            foreach (var queuedSqlKey in this.GetQueuedSql.Keys)
+            foreach (var queuedSqlKey in GetQueuedSql.Keys)
             {
-                if (!this.connections.ContainsKey(queuedSqlKey.ToUpper()))
+                if (!connections.ContainsKey(queuedSqlKey.ToUpper()))
                 {
-                    throw new KeyNotFoundException($"Connections does not contain a key for {queuedSqlKey.ToUpper()}. Keys present: {string.Join(", ", this.connections.Keys.ToList())}");
+                    throw new KeyNotFoundException($"Connections does not contain a key for {queuedSqlKey.ToUpper()}. Keys present: {string.Join(", ", connections.Keys.ToList())}");
                 }
 
-                results.AddRange(RunSql(this.connections[queuedSqlKey.ToUpper()], this.GetQueuedSql[queuedSqlKey].ToString()));
+                results.AddRange(RunSql(connections[queuedSqlKey.ToUpper()], GetQueuedSql[queuedSqlKey].ToString()));
 
-                this.GetQueuedSql[queuedSqlKey].Clear();
+                GetQueuedSql[queuedSqlKey].Clear();
             }
 
             return results;
@@ -74,7 +74,7 @@
         /// </returns>
         public IDictionary<string, string> GetConnections()
         {
-            return this.connections;
+            return connections;
         }
 
         /// <summary>
@@ -100,12 +100,12 @@
         /// <exception cref="KeyNotFoundException">Library item requested does not exist in the collection.</exception>
         public SqlItemDictionary QueueLibraryItem(string scriptKey, IDictionary<string, object> replacementValues = null)
         {
-            if (this.connections.Keys.Count <= 0)
+            if (connections.Keys.Count <= 0)
             {
                 throw new ArgumentException("This flavor can only be run if you pre-configure the connections.");
             }
 
-            if (!this.ContainsKey(scriptKey))
+            if (!ContainsKey(scriptKey))
             {
                 throw new KeyNotFoundException($"Library item does not exist in the collection: {scriptKey}");
             }
@@ -114,7 +114,7 @@
 
             sql = ItemParser.Parse(sql, replacementValues, this);
 
-            var scriptSplitter = string.Join("|", this.connections.Select(x => x.Key));
+            var scriptSplitter = string.Join("|", connections.Select(x => x.Key));
             var scripts = Regex.Split(
                 sql,
                 $"--DbType \\s*=\\s* ({scriptSplitter})",
@@ -130,7 +130,7 @@
                 var connectionType = scripts[i].ToUpper();
                 var sqlCode = scripts[i + 1];
 
-                this.Queue(connectionType, sqlCode);
+                Queue(connectionType, sqlCode);
             }
 
             return this;
@@ -153,12 +153,12 @@
         /// </exception>
         public SqlItemDictionary QueueSql(string connectionName, string sqlToQueue)
         {
-            if (this.connections.Keys.Count <= 0)
+            if (connections.Keys.Count <= 0)
             {
                 throw new ArgumentException("This flavor can only be run if you pre-configure the connections.");
             }
 
-            this.Queue(connectionName, sqlToQueue);
+            Queue(connectionName, sqlToQueue);
 
             return this;
         }
@@ -171,11 +171,11 @@
         /// </param>
         public void SetupConnections(IDictionary<string, string> connectionsToAdd)
         {
-            this.connections.Clear();
+            connections.Clear();
 
             foreach (var key in connectionsToAdd.Keys)
             {
-                this.connections.Add(key.ToUpper(), connectionsToAdd[key]);
+                connections.Add(key.ToUpper(), connectionsToAdd[key]);
             }
         }
 
@@ -263,12 +263,12 @@
             string connectionName,
             string sqlCode)
         {
-            if (!this.GetQueuedSql.ContainsKey(connectionName))
+            if (!GetQueuedSql.ContainsKey(connectionName))
             {
-                this.GetQueuedSql.Add(connectionName, new StringBuilder());
+                GetQueuedSql.Add(connectionName, new StringBuilder());
             }
 
-            this.GetQueuedSql[connectionName].AppendLine(sqlCode);
+            GetQueuedSql[connectionName].AppendLine(sqlCode);
         }
     }
 }

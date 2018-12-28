@@ -1,6 +1,6 @@
 ﻿namespace TestEase.LibraryItemDictionaries
 {
-    using TestEase.LibraryItems;
+    using LibraryItems;
 
     /// <inheritdoc />
     /// <summary>

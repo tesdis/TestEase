@@ -2,7 +2,7 @@
 {
     using System.IO;
 
-    using TestEase.LibraryItems;
+    using LibraryItems;
 
     /// <summary>
     /// Maintains a collection of library items

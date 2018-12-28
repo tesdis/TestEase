@@ -1,51 +1,57 @@
-﻿namespace TestEase.Tests
+﻿using NUnit.Framework;
+
+namespace TestEase.Tests
 {
     using System;
     using System.Collections.Generic;
     using System.Data.SqlClient;
     using System.Diagnostics.CodeAnalysis;
 
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
-    [TestClass]
     public class SqlDictionaryTests
     {
         private dynamic results;
         private readonly Dictionary<string, string> testConnections = new Dictionary<string, string>()
                                                                           {
-                                                                              {"Test", "Data Source=DESKTOP-RC3RG6H\\SKRAPS;Initial Catalog=master;Integrated Security=True"},
+                                                                              {"Test", "Data Source=.\\ct;Initial Catalog=master;Integrated Security=True"},
                                                                               {
                                                                                   "BadConnection",
                                                                                   "Data Source=NOWHERE;Initial Catalog=master;Integrated Security=True;Connection Timeout=1"
                                                                               }
                                                                           };
-
-        private readonly TestDataManager testDataManager;
+        private TestDataManager testDataManager { get; set; }
 
         public SqlDictionaryTests()
         {
-            this.testDataManager = new TestDataManager();
-            this.testDataManager.Sql.SetupConnections(this.testConnections);
+            testDataManager = new TestDataManager();
+            testDataManager.Sql.SetupConnections(testConnections);
         }
 
-        [TestMethod]
+        private void SetupDataManager()
+        {
+            testDataManager = new TestDataManager();
+            testDataManager.Sql.SetupConnections(testConnections);
+        }
+
+        [Test]
         public void BadConnectionStringTest()
         {
-            this.testDataManager.Sql.QueueSql("BadConnection", "select name from sys.databases");
+            SetupDataManager();
+            testDataManager.Sql.QueueSql("BadConnection", "select name from sys.databases");
 
             void ExecuteAction()
             {
-                this.testDataManager.Sql.Execute();
+                testDataManager.Sql.Execute();
             }
 
-            Assert.ThrowsException<SqlException>((Action)ExecuteAction, "A network-related or instance-specific error occurred while establishing a connection to SQL Server");
+            Assert.Throws<SqlException>(ExecuteAction, "A network-related or instance-specific error occurred while establishing a connection to SQL Server");
         }
 
-        [TestMethod]
+        [Test]
         public void OverwriteExistingConnectionStrings()
         {
-            this.testDataManager.Sql.SetupConnections(new Dictionary<string, string>()
+            SetupDataManager();
+            testDataManager.Sql.SetupConnections(new Dictionary<string, string>()
                                                           {
                                                               {"Test", "Data Source=DESKTOP-RC3RG6H\\SKRAPS;Initial Catalog=master;Integrated Security=True"},
                                                               {
@@ -54,16 +60,17 @@
                                                               }
                                                           });
 
-            Assert.IsTrue(this.testDataManager.Sql.GetConnections().Count == 2);
+            Assert.IsTrue(testDataManager.Sql.GetConnections().Count == 2);
         }
 
-        [TestMethod]
+        [Test]
         public void QueueSqlWithNoConnections()
         {
+            SetupDataManager();
             try
             {
-                this.testDataManager.Sql.SetupConnections(new Dictionary<string, string>());
-                this.testDataManager.Sql.QueueSql("Test", "select name from sys.databases");
+                testDataManager.Sql.SetupConnections(new Dictionary<string, string>());
+                testDataManager.Sql.QueueSql("Test", "select name from sys.databases");
                 Assert.Fail("Exception should have been thrown because no connections exist");
             }
             catch (ArgumentException e)
@@ -72,13 +79,14 @@
             }
         }
 
-        [TestMethod]
+        [Test]
         public void QueueLibraryItemWithNoConnections()
         {
+            SetupDataManager();
             try
             {
-                this.testDataManager.Sql.SetupConnections(new Dictionary<string, string>());
-                this.testDataManager.Sql.QueueLibraryItem("Test.TestSql");
+                testDataManager.Sql.SetupConnections(new Dictionary<string, string>());
+                testDataManager.Sql.QueueLibraryItem("Test.TestSql");
                 Assert.Fail("Exception should have been thrown because no connections exist");
             }
             catch (ArgumentException e)
@@ -87,35 +95,38 @@
             }
         }
 
-        [TestMethod]
+        [Test]
         public void MissingConnectionStringTest()
         {
-            this.testDataManager.Sql.QueueSql("MissingConnection", "select name from sys.databases");
+            SetupDataManager();
+            testDataManager.Sql.QueueSql("MissingConnection", "select name from sys.databases");
 
             void ExecuteAction()
             {
-                this.testDataManager.Sql.Execute();
+                testDataManager.Sql.Execute();
             }
 
-            Assert.ThrowsException<KeyNotFoundException>((Action)ExecuteAction, "Connections does not contain a key for MISSINGCONNECTION. Keys present: TEST, BADCONNECTION");
+            Assert.Throws<KeyNotFoundException>(ExecuteAction, "Connections does not contain a key for MISSINGCONNECTION. Keys present: TEST, BADCONNECTION");
         }
 
-        [TestMethod]
+        [Test]
         public void ExecuteWithSingleResult()
         {
-            this.testDataManager.Sql.QueueSql("Test", "select 1 [Val] from sys.databases where name in ('master')");
+            SetupDataManager();
+            testDataManager.Sql.QueueSql("Test", "select 1 [Val] from sys.databases where name in ('master')");
 
-            this.results = this.testDataManager.Sql.Execute();
+            results = testDataManager.Sql.Execute();
 
-            Assert.AreEqual(this.results[0].Val.ToString(), "1");
+            Assert.AreEqual(results[0].Val.ToString(), "1");
         }
 
-        [TestMethod]
+        [Test]
         public void ExecuteWithNothingQueued()
         {
+            SetupDataManager();
             try
             {
-                this.results = this.testDataManager.Sql.Execute();
+                results = testDataManager.Sql.Execute();
                 Assert.Fail("Exception should have been thrown because no sql is queued");
             }
             catch (Exception e)
@@ -124,36 +135,40 @@
             }
         }
 
-        [TestMethod]
+
+        [Test]
         public void ExecuteWithSqlError()
         {
-            this.testDataManager.Sql.QueueSql("Test", "select 1/0 [Val] from sys.databases where name in ('master')");
+            SetupDataManager();
+            testDataManager.Sql.QueueSql("Test", "select 1/0 [Val] from sys.databases where name in ('master')");
 
-            Action executeAction = () =>
+            TestDelegate executeAction = () =>
                 {
-                    this.results = this.testDataManager.Sql.Execute();
+                    results = testDataManager.Sql.Execute();
                 };
 
 
-            Assert.ThrowsException<SqlException>(executeAction);
+            Assert.Throws<SqlException>(executeAction);
         }
 
-        [TestMethod]
+        [Test]
         public void ExecuteLibraryItemWithSingleResult()
         {
-            this.testDataManager.Sql.QueueLibraryItem("Test.TestSql");
+            SetupDataManager();
+            testDataManager.Sql.QueueLibraryItem("Test.TestSql");
 
-            this.results = this.testDataManager.Sql.Execute();
+            results = testDataManager.Sql.Execute();
 
-            Assert.AreEqual(this.results[0].Val.ToString(), "1");
+            Assert.AreEqual(results[0].Val.ToString(), "1");
         }
 
-        [TestMethod]
+        [Test]
         public void ExecuteLibraryItemBadDbType()
         {
+            SetupDataManager();
             try
             {
-                this.testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithBadDbType");
+                testDataManager.Sql.QueueLibraryItem("sql.TestSqlWithBadDbType");
                 Assert.Fail("Exception should be thrown because the script contains a db type that does not have a connection configured");
             }
             catch (Exception e)
@@ -163,59 +178,80 @@
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ExecuteWithMultipleResult()
         {
-            this.testDataManager.Sql.QueueSql("Test", "select 1 [Val] from sys.databases where name in ('master')");
-            this.testDataManager.Sql.QueueSql("Test", "select 2 [Val] from sys.databases where name in ('master')");
-            this.testDataManager.Sql.QueueSql("Test", "select 3 [Val] from sys.databases where name in ('master')");
+            SetupDataManager();
+            testDataManager.Sql.QueueSql("Test", "select 1 [Val] from sys.databases where name in ('master')");
+            testDataManager.Sql.QueueSql("Test", "select 2 [Val] from sys.databases where name in ('master')");
+            testDataManager.Sql.QueueSql("Test", "select 3 [Val] from sys.databases where name in ('master')");
 
-            this.results = this.testDataManager.Sql.Execute();
+            results = testDataManager.Sql.Execute();
 
-            Assert.AreEqual(this.results[0].Val.ToString(), "1");
-            Assert.AreEqual(this.results[1].Val.ToString(), "2");
-            Assert.AreEqual(this.results[2].Val.ToString(), "3");
+            Assert.AreEqual(results[0].Val.ToString(), "1");
+            Assert.AreEqual(results[1].Val.ToString(), "2");
+            Assert.AreEqual(results[2].Val.ToString(), "3");
         }
 
-        [TestMethod]
+        [Test]
         public void ExecuteLibraryItemWithIncludes()
         {
-            this.testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithIncludes", new Dictionary<string, object>() { { "BaseValue", 69 } });
+            SetupDataManager();
+            testDataManager.Sql.QueueLibraryItem("sql.TestSqlWithIncludes", new Dictionary<string, object>() { { "BaseValue", 69 } });
 
-            this.results = this.testDataManager.Sql.Execute();
+            results = testDataManager.Sql.Execute();
 
-            Assert.AreEqual(this.results[0].Val.ToString(), "22");
-            Assert.AreEqual(this.results[1].Val.ToString(), "69");
-        }
-
-        [TestMethod]
-        public void ExecuteLibraryItemWithIncludesNoReplacements()
-        {
-            this.testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithIncludes_NoReplacements");
-
-            this.results = this.testDataManager.Sql.Execute();
-
-            Assert.AreEqual(this.results[0].Val.ToString(), "22");
-            Assert.AreEqual(this.results[1].Val.ToString(), "1");
-        }
-
-        [TestMethod]
-        public void ExecuteLibraryItemWithBadIncludes()
-        {
-            void QueueAction()
+            foreach (var li in results)
             {
-                this.testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithBadIncludes", new Dictionary<string, object>() { { "BaseValue", 69 } });
+                foreach (var property in (IDictionary<String, Object>)li)
+                {
+                    Console.WriteLine(property.Key + ": " + property.Value);
+                }
             }
 
-            Assert.ThrowsException<KeyNotFoundException>((Action)QueueAction, "Library item does not exist in the collection: Test.TestSqlWithBadIncludes");
+            var result1 = results[0];
+            var result2 = results[1];
+            var prop1 = (IDictionary<String, Object>) result1;
+            var prop2 = (IDictionary<String, Object>)result2;
+
+
+
+
+            Assert.AreEqual(prop1["FirstCol"].ToString(), "22");
+            Assert.AreEqual(prop2["PassedInCol"].ToString(), "69");
         }
 
-        [TestMethod]
+        [Test]
+        public void ExecuteLibraryItemWithIncludesNoReplacements()
+        {
+            SetupDataManager();
+            testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithIncludes_NoReplacements");
+
+            results = testDataManager.Sql.Execute();
+
+            Assert.AreEqual(results[0].Val.ToString(), "22");
+            Assert.AreEqual(results[1].Val.ToString(), "1");
+        }
+
+        [Test]
+        public void ExecuteLibraryItemWithBadIncludes()
+        {
+            SetupDataManager();
+            void QueueAction()
+            {
+                testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithBadIncludes", new Dictionary<string, object>() { { "BaseValue", 69 } });
+            }
+
+            Assert.Throws<KeyNotFoundException>(QueueAction, "Library item does not exist in the collection: Test.TestSqlWithBadIncludes");
+        }
+
+        [Test]
         public void ExecuteLibraryItemWithBadNestedIncludes()
         {
+            SetupDataManager();
             try
             {
-                this.testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithBadInclude", new Dictionary<string, object>() { { "BaseValue", 69 } });
+                testDataManager.Sql.QueueLibraryItem("sql.TestSqlBadNestedIncludes", new Dictionary<string, object>() { { "BaseValue", 69 } });
             }
             catch (Exception e)
             {
@@ -224,12 +260,13 @@
 
         }
 
-        [TestMethod]
+        [Test]
         public void ExecuteLibraryItemWithBadIncludesNoDefaultValues()
         {
+            SetupDataManager();
             try
             {
-                this.testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithBadInclude");
+                testDataManager.Sql.QueueLibraryItem("sql.TestSqlWithBadIncludes");
                 Assert.Fail("Exception should have been thrown");
             }
             catch (Exception e)
@@ -238,15 +275,16 @@
             }
         }
 
-        [TestMethod]
+        [Test]
         public void ExecuteLibraryItemWithIncludesNoDefaultValueForMissingReplacement()
         {
+            SetupDataManager();
             void QueueAction()
             {
-                this.testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithIncludesNoDefaults");
+                testDataManager.Sql.QueueLibraryItem("Test.TestSqlWithIncludesNoDefaults");
             }
 
-            Assert.ThrowsException<ArgumentException>((Action)QueueAction);
+            Assert.Throws<ArgumentException>((QueueAction));
         }
     }
 }

@@ -8,17 +8,15 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 // ReSharper disable ExceptionNotDocumented
+
+using NUnit.Framework;
+
 namespace TestEase.Tests
 {
-    using System.Diagnostics.CodeAnalysis;
 
-    using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1600:ElementsMustBeDocumented", Justification = "Reviewed. Suppression is OK here.")]
-    [TestClass]
     public class FileDiscoveryTests
     {
-        [TestMethod]
+        [Test]
         public void TestJsonDiscovery()
         {
             var tm = new TestDataManager();
@@ -26,7 +24,7 @@ namespace TestEase.Tests
             Assert.IsTrue(tm.Json.Keys.Count > 0);
         }
 
-        [TestMethod]
+        [Test]
         public void TestSqlDiscovery()
         {
             var tm = new TestDataManager();
@@ -34,7 +32,7 @@ namespace TestEase.Tests
             Assert.IsTrue(tm.Sql.Keys.Count > 0);
         }
 
-        [TestMethod]
+        [Test]
         public void TestTextDiscovery()
         {
             var tm = new TestDataManager();
@@ -42,7 +40,7 @@ namespace TestEase.Tests
             Assert.IsTrue(tm.Text.Keys.Count > 0);
         }
 
-        [TestMethod]
+        [Test]
         public void TestXmlDiscovery()
         {
             var tm = new TestDataManager();
